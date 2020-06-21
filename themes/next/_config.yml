@@ -284,7 +284,7 @@ follow_me:
 related_posts:
   enable: true
   title: You May Also Like # Custom header, leave empty to use the default one
-  display_in_home: true
+  display_in_home: false
   params:
     maxCount: 5
     PPMixingRate: 0.4
