@@ -4,7 +4,7 @@
 
 # Site
 title: Xilu's Blog
-subtitle: 'meow'
+subtitle: 'meow <<< (ฅ'ω'ฅ) '
 description: ''
 keywords:
 author: Xilu Wang
@@ -62,7 +62,7 @@ index_generator:
   order_by: -date
 
 # Category & Tag
-default_category: uncategorized
+default_category: misc
 category_map:
 tag_map:
 
