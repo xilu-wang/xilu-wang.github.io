@@ -4,30 +4,87 @@
   
     
     <entry>
-      <title>Hello World</title>
-      <link href="/uncategorized/hello-world/"/>
-      <url>/uncategorized/hello-world/</url>
+      <title>SSH Server的无密登陆</title>
+      <link href="/misc/ssh-server/"/>
+      <url>/misc/ssh-server/</url>
       
-        <content type="html"><![CDATA[<p>Welcome to <a href="https://hexo.io/" target="_blank" rel="noopener">Hexo</a>! This is your very first post. Check <a href="https://hexo.io/docs/" target="_blank" rel="noopener">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a href="https://hexo.io/docs/troubleshooting.html" target="_blank" rel="noopener">troubleshooting</a> or you can ask me on <a href="https://github.com/hexojs/hexo/issues" target="_blank" rel="noopener">GitHub</a>.</p><h2 id="Quick-Start"><a href="#Quick-Start" class="headerlink" title="Quick Start"></a>Quick Start</h2><h3 id="Create-a-new-post"><a href="#Create-a-new-post" class="headerlink" title="Create a new post"></a>Create a new post</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo new <span class="string">"My New Post"</span></span><br></pre></td></tr></table></figure><p>More info: <a href="https://hexo.io/docs/writing.html" target="_blank" rel="noopener">Writing</a></p><h3 id="Run-server"><a href="#Run-server" class="headerlink" title="Run server"></a>Run server</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo server</span><br></pre></td></tr></table></figure><p>More info: <a href="https://hexo.io/docs/server.html" target="_blank" rel="noopener">Server</a></p><h3 id="Generate-static-files"><a href="#Generate-static-files" class="headerlink" title="Generate static files"></a>Generate static files</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo generate</span><br></pre></td></tr></table></figure><p>More info: <a href="https://hexo.io/docs/generating.html" target="_blank" rel="noopener">Generating</a></p><h3 id="Deploy-to-remote-sites"><a href="#Deploy-to-remote-sites" class="headerlink" title="Deploy to remote sites"></a>Deploy to remote sites</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo deploy</span><br></pre></td></tr></table></figure><p>More info: <a href="https://hexo.io/docs/one-command-deployment.html" target="_blank" rel="noopener">Deployment</a></p>]]></content>
+        <content type="html"><![CDATA[<h3 id="使用场景介绍"><a href="#使用场景介绍" class="headerlink" title="使用场景介绍"></a>使用场景介绍</h3><p>我分别启动了三个server, host, IP 和username如下：</p><table><thead><tr><th>Host Name</th><th>IP Address</th><th>Username</th></tr></thead><tbody><tr><td>namenode</td><td>192.168.1.149</td><td>user1</td></tr><tr><td>resourcemanager</td><td>192.168.1.150</td><td>user2</td></tr><tr><td>secnamenode</td><td>192.168.1.151</td><td>user3</td></tr></tbody></table><p>如果不配置passwordless，登陆方法如下：</p><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ ssh user1@namenode</span><br><span class="line">user1@snamenode<span class="string">'s password:</span></span><br></pre></td></tr></table></figure><p><strong>注：</strong> 配置IP和host的映射可以在/etc/hosts里添加如下：</p> <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">192.168.1.149       namenode</span><br><span class="line">192.168.1.150       resourcemanager</span><br><span class="line">192.168.1.151       secnamenode</span><br></pre></td></tr></table></figure><h3 id="步骤"><a href="#步骤" class="headerlink" title="步骤"></a>步骤</h3><h4 id="Step-0-（可选）配置IP对应的默认用户名"><a href="#Step-0-（可选）配置IP对应的默认用户名" class="headerlink" title="Step 0.（可选）配置IP对应的默认用户名"></a>Step 0.（可选）配置IP对应的默认用户名</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ sudo vim ~/.ssh/config</span><br></pre></td></tr></table></figure><p>添加如下：</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">Host namenode</span><br><span class="line">    User user1</span><br><span class="line">Host resourcemanager</span><br><span class="line">    User user2</span><br><span class="line">Host datanode</span><br><span class="line">    User user3</span><br></pre></td></tr></table></figure><h4 id="Step-1-生成密钥"><a href="#Step-1-生成密钥" class="headerlink" title="Step 1. 生成密钥"></a>Step 1. 生成密钥</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ ssh-keygen</span><br></pre></td></tr></table></figure><p>这是互动性的命令，可以直接回车选用默认值。生成完之后，会在<code>～/.ssh/</code>中产生两个密钥，其中<code>id_rsa</code>是私钥，<code>id_rsa.pub</code>是公钥。</p><h4 id="Step-3-复制公钥到其他节点"><a href="#Step-3-复制公钥到其他节点" class="headerlink" title="Step 3. 复制公钥到其他节点"></a>Step 3. 复制公钥到其他节点</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ ssh-copy-id -i ~/.ssh/id_*.pub namenode</span><br><span class="line">$ ssh-copy-id -i ~/.ssh/id_*.pub resourcemanager</span><br><span class="line">$ ssh-copy-id -i ~/.ssh/id_*.pub secnamenode</span><br></pre></td></tr></table></figure><h4 id="Step-4-测试"><a href="#Step-4-测试" class="headerlink" title="Step 4. 测试"></a>Step 4. 测试</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ ssh namenode</span><br><span class="line">$ ssh resourcemanager</span><br><span class="line">$ ssh secnamenode</span><br></pre></td></tr></table></figure>]]></content>
       
       
+      <categories>
+          
+          <category> misc </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> hadoop </tag>
+            
+            <tag> ssh </tag>
+            
+        </tags>
       
     </entry>
     
     
     
     <entry>
-      <title>test</title>
-      <link href="/uncategorized/test/"/>
-      <url>/uncategorized/test/</url>
+      <title>Hadoop集群快速搭建</title>
+      <link href="/hadoop/setup-hadoop-cluster/"/>
+      <url>/hadoop/setup-hadoop-cluster/</url>
       
-        <content type="html"><![CDATA[]]></content>
+        <content type="html"><![CDATA[<h1 id="Hadoop-Cluster的搭建"><a href="#Hadoop-Cluster的搭建" class="headerlink" title="Hadoop Cluster的搭建"></a>Hadoop Cluster的搭建</h1><h2 id="集群部署规划"><a href="#集群部署规划" class="headerlink" title="集群部署规划"></a>集群部署规划</h2><table><thead><tr><th></th><th align="center">node-1</th><th align="center">node-2</th><th align="center">node-3</th></tr></thead><tbody><tr><td>HDFS</td><td align="center">NameNode, DataNode</td><td align="center">DataNode</td><td align="center">DataNode, SecondaryNameNode</td></tr><tr><td>YARN</td><td align="center">NodeManager</td><td align="center">ResourceManager, NodeManager</td><td align="center">Node Manager</td></tr></tbody></table><h2 id="Virtual-Machine-（VM）准备工作"><a href="#Virtual-Machine-（VM）准备工作" class="headerlink" title="Virtual Machine （VM）准备工作"></a>Virtual Machine （VM）准备工作</h2><p>我用的机器是一台Windows的Desktop。也算是配置一般的十年前的老机器了。原来一直闲置在车库，没想到十年后还能工作的这么好。配置VM我用的是Vagrant和VirtualBox，具体操作如下。</p><h3 id="启动VM"><a href="#启动VM" class="headerlink" title="启动VM"></a>启动VM</h3><p>我已经写好用于vm配置和启动的Vagrantfile和bootstrap.sh，同时在bootstarp.sh里也更改了hadoop集群的一些基本配置。<br><strong>关于hadoop集群的配置介绍，可以参考我的另一篇文章：</strong> <a href="../hadoop-cluster-config">如何配置小规模的Hadoop集群</a></p><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ git <span class="built_in">clone</span> https://github.com/xilu-wang/vagrant-hadoop.git</span><br><span class="line">$ <span class="built_in">cd</span> vagrant-hadoop</span><br><span class="line">$ vagrant up</span><br></pre></td></tr></table></figure><h3 id="更改每个VM的localdomain，以及IP对应的host"><a href="#更改每个VM的localdomain，以及IP对应的host" class="headerlink" title="更改每个VM的localdomain，以及IP对应的host"></a>更改每个VM的localdomain，以及IP对应的host</h3><h3 id="设置ssh-passwordless登陆"><a href="#设置ssh-passwordless登陆" class="headerlink" title="设置ssh passwordless登陆"></a>设置ssh passwordless登陆</h3><h3 id="检查hdfs和yarn的配置"><a href="#检查hdfs和yarn的配置" class="headerlink" title="检查hdfs和yarn的配置"></a>检查hdfs和yarn的配置</h3><h3 id="启动hdfs和yarn"><a href="#启动hdfs和yarn" class="headerlink" title="启动hdfs和yarn"></a>启动hdfs和yarn</h3><h3 id="测试hdfs-client-api和简单map-reduce-job"><a href="#测试hdfs-client-api和简单map-reduce-job" class="headerlink" title="测试hdfs client api和简单map reduce job"></a>测试hdfs client api和简单map reduce job</h3><h2 id="潜在问题和Debug："><a href="#潜在问题和Debug：" class="headerlink" title="潜在问题和Debug："></a>潜在问题和Debug：</h2><ul><li>如果执行完vagrant up之后，vm无法登入，可以重新进入本地的git repo再执行一次 vagrant reload</li></ul>]]></content>
       
+      
+      <categories>
+          
+          <category> hadoop </category>
+          
+      </categories>
       
       
         <tags>
             
-            <tag> test </tag>
+            <tag> hadoop </tag>
+            
+            <tag> hdfs </tag>
+            
+            <tag> yarn </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>如何配置小规模的Hadoop集群</title>
+      <link href="/hadoop/hadoop-cluster-config/"/>
+      <url>/hadoop/hadoop-cluster-config/</url>
+      
+        <content type="html"><![CDATA[]]></content>
+      
+      
+      <categories>
+          
+          <category> hadoop </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> hadoop </tag>
+            
+            <tag> configuration </tag>
+            
+            <tag> cluster </tag>
+            
+            <tag> hdfs </tag>
+            
+            <tag> yarn </tag>
             
         </tags>
       

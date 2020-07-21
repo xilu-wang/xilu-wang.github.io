@@ -2,37 +2,44 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
-    <loc>https://xilu-wang.github.io/uncategorized/hello-world/</loc>
+    <loc>https://xilu-wang.github.io/hadoop/hadoop-cluster-config/</loc>
     
-    <lastmod>2020-06-21T08:41:42.748Z</lastmod>
+    <lastmod>2020-07-21T05:58:17.621Z</lastmod>
     
   </url>
   
   <url>
-    <loc>https://xilu-wang.github.io/uncategorized/test/</loc>
+    <loc>https://xilu-wang.github.io/hadoop/setup-hadoop-cluster/</loc>
     
-    <lastmod>2020-06-21T08:41:42.748Z</lastmod>
+    <lastmod>2020-07-21T05:58:17.621Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>https://xilu-wang.github.io/misc/ssh-server/</loc>
+    
+    <lastmod>2020-07-21T05:58:17.621Z</lastmod>
     
   </url>
   
   <url>
     <loc>https://xilu-wang.github.io/about/index.html</loc>
     
-    <lastmod>2020-06-21T08:41:42.748Z</lastmod>
+    <lastmod>2020-07-21T05:58:17.621Z</lastmod>
     
   </url>
   
   <url>
     <loc>https://xilu-wang.github.io/categories/index.html</loc>
     
-    <lastmod>2020-06-21T08:41:42.748Z</lastmod>
+    <lastmod>2020-07-21T05:58:17.621Z</lastmod>
     
   </url>
   
   <url>
     <loc>https://xilu-wang.github.io/tags/index.html</loc>
     
-    <lastmod>2020-06-21T08:41:42.748Z</lastmod>
+    <lastmod>2020-07-21T05:58:17.621Z</lastmod>
     
   </url>
   
