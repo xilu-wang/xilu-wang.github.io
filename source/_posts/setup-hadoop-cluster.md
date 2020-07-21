@@ -178,6 +178,7 @@ $ sbin/stop-yarn.sh
 ## 7. 测试hdfs client api和简单map reduce job
 
 我是自己写了一个hdfs的client api，上传/下载文件test.txt
+
 示例client api代码：
 ```bash
 $ git clone https://github.com/xilu-wang/hdfs-client-java.git
