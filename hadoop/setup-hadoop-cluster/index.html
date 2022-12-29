@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css" integrity="sha256-Z1K5uhUaJXA7Ll0XrZ/0JhX4lAtZFpT6jkKrEDT0drU=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"xilu-wang.github.io","root":"/","images":"/images","scheme":"Muse","darkmode":false,"version":"8.14.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}","hits_time":"${hits} results found in ${time} ms","hits":"${hits} results found"}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="在这个无聊的周末，我用了一个闲置很久的老电脑搭了一个hadoop的开发环境，这篇文章先介绍hdfs和yarn的搭建。预计用时15分钟。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Hadoop集群快速搭建">
+<meta property="og:url" content="https://xilu-wang.github.io/hadoop/setup-hadoop-cluster/index.html">
+<meta property="og:site_name" content="Xilu&#39;s Blog">
+<meta property="og:description" content="在这个无聊的周末，我用了一个闲置很久的老电脑搭了一个hadoop的开发环境，这篇文章先介绍hdfs和yarn的搭建。预计用时15分钟。">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2020-07-01T17:36:01.000Z">
+<meta property="article:modified_time" content="2022-12-29T19:30:29.324Z">
+<meta property="article:author" content="Xilu Wang">
+<meta property="article:tag" content="hadoop">
+<meta property="article:tag" content="hdfs">
+<meta property="article:tag" content="yarn">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="https://xilu-wang.github.io/hadoop/setup-hadoop-cluster/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"en","comments":true,"permalink":"https://xilu-wang.github.io/hadoop/setup-hadoop-cluster/","path":"hadoop/setup-hadoop-cluster/","title":"Hadoop集群快速搭建"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>Hadoop集群快速搭建 | Xilu's Blog</title>
+  
+
+
+
+
+
+
+  <script async defer data-website-id="" src=""></script>
+
+  <script defer data-domain="" src=""></script>
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar" role="button">
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Xilu's Blog</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">已阅留爪(ฅ´ω`ฅ)</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="Search" role="button">
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Hadoop-Cluster%E7%9A%84%E6%90%AD%E5%BB%BA"><span class="nav-number">1.</span> <span class="nav-text">Hadoop Cluster的搭建</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-%E9%9B%86%E7%BE%A4%E9%83%A8%E7%BD%B2%E8%A7%84%E5%88%92"><span class="nav-number">1.1.</span> <span class="nav-text">1. 集群部署规划</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-Virtual-Machine-%EF%BC%88VM%EF%BC%89%E5%87%86%E5%A4%87%E5%B7%A5%E4%BD%9C"><span class="nav-number">1.2.</span> <span class="nav-text">2. Virtual Machine （VM）准备工作</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-%E7%99%BB%E9%99%86VM%E5%B9%B6%E6%9B%B4%E6%96%B0host"><span class="nav-number">1.3.</span> <span class="nav-text">3. 登陆VM并更新host</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-%E8%AE%BE%E7%BD%AEssh-passwordless"><span class="nav-number">1.4.</span> <span class="nav-text">4. 设置ssh passwordless</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5-%E6%A3%80%E6%9F%A5hdfs%E5%92%8Cyarn%E7%9A%84%E9%85%8D%E7%BD%AE"><span class="nav-number">1.5.</span> <span class="nav-text">5. 检查hdfs和yarn的配置</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#6-%E5%90%AF%E5%8A%A8hdfs%E5%92%8Cyarn"><span class="nav-number">1.6.</span> <span class="nav-text">6. 启动hdfs和yarn</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%AC%AC%E4%B8%80%E6%AD%A5%EF%BC%9A%E6%A0%BC%E5%BC%8F%E5%8C%96NameNode"><span class="nav-number">1.6.0.1.</span> <span class="nav-text">第一步：格式化NameNode</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%AC%AC%E4%BA%8C%E6%AD%A5%EF%BC%9A%EF%BC%88%E9%80%89%E6%8B%A9%E4%B8%80%EF%BC%8C%E4%B8%8D%E6%8E%A8%E8%8D%90%EF%BC%89%E5%8D%95%E7%82%B9%E5%90%AF%E5%8A%A8-x2F-%E5%81%9C%E6%AD%A2"><span class="nav-number">1.6.0.2.</span> <span class="nav-text">第二步：（选择一，不推荐）单点启动&#x2F;停止</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%AC%AC%E4%BA%8C%E6%AD%A5%EF%BC%9A%EF%BC%88%E9%80%89%E6%8B%A9%E4%BA%8C%EF%BC%8C%E6%8E%A8%E8%8D%90%EF%BC%89%E9%9B%86%E7%BE%A4%E5%90%AF%E5%8A%A8-x2F-%E5%81%9C%E6%AD%A2"><span class="nav-number">1.6.0.3.</span> <span class="nav-text">第二步：（选择二，推荐）集群启动&#x2F;停止</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#7-%E6%B5%8B%E8%AF%95hdfs-client-api%E5%92%8C%E7%AE%80%E5%8D%95map-reduce-job"><span class="nav-number">1.7.</span> <span class="nav-text">7. 测试hdfs client api和简单map reduce job</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#8-UI"><span class="nav-number">1.8.</span> <span class="nav-text">8. UI</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%BD%9C%E5%9C%A8%E9%97%AE%E9%A2%98%E5%92%8CDebug%EF%BC%9A"><span class="nav-number">2.</span> <span class="nav-text">潜在问题和Debug：</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Xilu Wang</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">3</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">2</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">6</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://xilu-wang.github.io/hadoop/setup-hadoop-cluster/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Xilu Wang">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Xilu's Blog">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="Hadoop集群快速搭建 | Xilu's Blog">
+      <meta itemprop="description" content="在这个无聊的周末，我用了一个闲置很久的老电脑搭了一个hadoop的开发环境，这篇文章先介绍hdfs和yarn的搭建。预计用时15分钟。">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Hadoop集群快速搭建
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+
+      <time title="Created: 2020-07-01 17:36:01" itemprop="dateCreated datePublished" datetime="2020-07-01T17:36:01+00:00">2020-07-01</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">Edited on</span>
+      <time title="Modified: 2022-12-29 19:30:29" itemprop="dateModified" datetime="2022-12-29T19:30:29+00:00">2022-12-29</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">In</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/hadoop/" itemprop="url" rel="index"><span itemprop="name">hadoop</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+            <div class="post-description">在这个无聊的周末，我用了一个闲置很久的老电脑搭了一个hadoop的开发环境，这篇文章先介绍hdfs和yarn的搭建。预计用时15分钟。</div>
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <h1 id="Hadoop-Cluster的搭建"><a href="#Hadoop-Cluster的搭建" class="headerlink" title="Hadoop Cluster的搭建"></a>Hadoop Cluster的搭建</h1><h2 id="1-集群部署规划"><a href="#1-集群部署规划" class="headerlink" title="1. 集群部署规划"></a>1. 集群部署规划</h2><table>
+<thead>
+<tr>
+<th></th>
+<th align="center">node-1</th>
+<th align="center">node-2</th>
+<th align="center">node-3</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>HDFS</td>
+<td align="center">NameNode, DataNode</td>
+<td align="center">DataNode</td>
+<td align="center">DataNode, SecondaryNameNode</td>
+</tr>
+<tr>
+<td>YARN</td>
+<td align="center">NodeManager</td>
+<td align="center">ResourceManager, NodeManager</td>
+<td align="center">Node Manager</td>
+</tr>
+</tbody></table>
+<h2 id="2-Virtual-Machine-（VM）准备工作"><a href="#2-Virtual-Machine-（VM）准备工作" class="headerlink" title="2. Virtual Machine （VM）准备工作"></a>2. Virtual Machine （VM）准备工作</h2><p>我用的机器是一台Windows的Desktop。也算是配置一般的十年前的老机器了。原来一直闲置在车库，没想到十年后还能工作的这么好。配置VM我用的是Vagrant和VirtualBox，我已经写好用于vm配置和启动的Vagrantfile和bootstrap.sh，同时在bootstarp.sh里也更改了hadoop集群的一些基本配置。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ git <span class="built_in">clone</span> https://github.com/xilu-wang/vagrant-hadoop.git</span><br><span class="line">$ <span class="built_in">cd</span> vagrant-hadoop</span><br><span class="line">$ vagrant up</span><br></pre></td></tr></table></figure>
+<p><em>注：可以在VM跑起来之后删除.vagrant文件夹，重新执行vagrant up，就会新建新的VM。如此重复三次。</em></p>
+<h2 id="3-登陆VM并更新host"><a href="#3-登陆VM并更新host" class="headerlink" title="3. 登陆VM并更新host"></a>3. 登陆VM并更新host</h2><p><strong>login:</strong> admin<br><strong>password:</strong> admin</p>
+<p>server-1:</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ sudo hostnamectl set-hostname namenode</span><br></pre></td></tr></table></figure>
+<p>server-2:</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ sudo hostnamectl set-hostname resourcemanager</span><br></pre></td></tr></table></figure>
+<p>server-3:</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ sudo hostnamectl set-hostname secnamenode</span><br></pre></td></tr></table></figure>
+
+
+<p>同时，可以通过ifconfig拿到server IP，用来更新host的映射。</p>
+<p>结果示例：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">$ ifconfig</span><br><span class="line">eth0: flags=4163&lt;UP,BROADCAST,RUNNING,MULTICAST&gt;  mtu 1500</span><br><span class="line">        inet 10.0.2.15  netmask 255.255.255.0  broadcast 10.0.2.255</span><br><span class="line">        inet6 fe80::a00:27ff:fe15:602e  prefixlen 64  scopeid 0x20&lt;<span class="built_in">link</span>&gt;</span><br><span class="line">        ether 08:00:27:15:60:2e  txqueuelen 1000  (Ethernet)</span><br><span class="line">        RX packets 240668  bytes 210747618 (210.7 MB)</span><br><span class="line">        RX errors 0  dropped 0  overruns 0  frame 0</span><br><span class="line">        TX packets 108428  bytes 22769110 (22.7 MB)</span><br><span class="line">        TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0</span><br><span class="line"></span><br><span class="line">eth1: flags=4163&lt;UP,BROADCAST,RUNNING,MULTICAST&gt;  mtu 1500</span><br><span class="line">        inet 192.168.1.150  netmask 255.255.255.0  broadcast 192.168.1.255</span><br><span class="line">        inet6 2600:1700:1151:b370::26  prefixlen 128  scopeid 0x0&lt;global&gt;</span><br><span class="line">        inet6 fe80::a00:27ff:fe22:12d0  prefixlen 64  scopeid 0x20&lt;<span class="built_in">link</span>&gt;</span><br><span class="line">        inet6 2600:1700:1151:b370:a00:27ff:fe22:12d0  prefixlen 64  scopeid 0x0&lt;global&gt;</span><br><span class="line">        ether 08:00:27:22:12:d0  txqueuelen 1000  (Ethernet)</span><br><span class="line">        RX packets 1797145  bytes 433847872 (433.8 MB)</span><br><span class="line">        RX errors 0  dropped 550377  overruns 0  frame 0</span><br><span class="line">        TX packets 570469  bytes 88389007 (88.3 MB)</span><br><span class="line">        TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0</span><br><span class="line"></span><br><span class="line">lo: flags=73&lt;UP,LOOPBACK,RUNNING&gt;  mtu 65536</span><br><span class="line">        inet 127.0.0.1  netmask 255.0.0.0</span><br><span class="line">        loop  txqueuelen 1000  (Local Loopback)</span><br><span class="line">        RX packets 584917  bytes 81921922 (81.9 MB)</span><br><span class="line">        RX errors 0  dropped 0  overruns 0  frame 0</span><br><span class="line">        TX packets 584917  bytes 81921922 (81.9 MB)</span><br><span class="line">        TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0</span><br></pre></td></tr></table></figure>
+<p>在这里，eth1下面的<code>inet 192.168.1.150</code>既是本机IP。</p>
+<p>拿到三个VM的IP后，依次在每个VM的<code>/etc/hosts</code>文件里加入:<br> <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">192.168.1.149       namenode</span><br><span class="line">192.168.1.150       resourcemanager</span><br><span class="line">192.168.1.151       secnamenode</span><br></pre></td></tr></table></figure></p>
+<h2 id="4-设置ssh-passwordless"><a href="#4-设置ssh-passwordless" class="headerlink" title="4. 设置ssh passwordless"></a>4. 设置ssh passwordless</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">$ ssh-keygen</span><br><span class="line">$ ssh-copy-id -i ~/.ssh/id_*.pub namenode</span><br><span class="line">$ ssh-copy-id -i ~/.ssh/id_*.pub resourcemanager</span><br><span class="line">$ ssh-copy-id -i ~/.ssh/id_*.pub secnamenode</span><br></pre></td></tr></table></figure>
+<p>细节可以参考我的另外一篇博客：**<a href="../../misc/ssh-server">SSH server的无密登陆</a>**</p>
+<h2 id="5-检查hdfs和yarn的配置"><a href="#5-检查hdfs和yarn的配置" class="headerlink" title="5. 检查hdfs和yarn的配置"></a>5. 检查hdfs和yarn的配置</h2><p>Hadoop的配置已经在bootstrap vm的时候已经更新了。</p>
+<p>需要检查的文件分别是：</p>
+<ol>
+<li>core-site.xml * </li>
+<li>hdfs-site.xml *</li>
+<li>yarn-site.xml *</li>
+<li>mapred-site.xml</li>
+<li>hadoop-env.sh</li>
+<li>slaves *</li>
+</ol>
+<p>*如果在host里面没有添加IP的映射，需要将文件中对应的hostname更新成原IP。</p>
+<p>关于hadoop集群的配置介绍，可以参考我的另一篇文章：**<a href="../hadoop-cluster-config">如何配置小规模的Hadoop集群</a>**</p>
+<h2 id="6-启动hdfs和yarn"><a href="#6-启动hdfs和yarn" class="headerlink" title="6. 启动hdfs和yarn"></a>6. 启动hdfs和yarn</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ <span class="built_in">cd</span> /home/admin/hadoop/hadoop-2.7.2/</span><br></pre></td></tr></table></figure>
+
+<h4 id="第一步：格式化NameNode"><a href="#第一步：格式化NameNode" class="headerlink" title="第一步：格式化NameNode"></a>第一步：格式化NameNode</h4><ol start="0">
+<li>在node-1（namenode）进行格式化</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hadoop namenode -format</span><br></pre></td></tr></table></figure>
+
+<h4 id="第二步：（选择一，不推荐）单点启动-x2F-停止"><a href="#第二步：（选择一，不推荐）单点启动-x2F-停止" class="headerlink" title="第二步：（选择一，不推荐）单点启动&#x2F;停止"></a>第二步：（选择一，不推荐）单点启动&#x2F;停止</h4><ol>
+<li><p>在node-1（namenode）启动namenode</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ sbin/hadoop-daemon.sh start namenode</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>在node-2（resourcemanager）启动yarn</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ sbin/yarn-daemon.sh start resourcemanager</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>在node-3（secnamenode）启动</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ sbin/hadoop-daemon.sh start secondarynamenode</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>在node-1， node-2， node-3启动datanode</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ sbin/hadoop-daemon.sh start datanode</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>在node-1， node-2， node-3启动nodemanager</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ sbin/hadoop-daemon.sh start nodemanager</span><br></pre></td></tr></table></figure></li>
+</ol>
+<h4 id="第二步：（选择二，推荐）集群启动-x2F-停止"><a href="#第二步：（选择二，推荐）集群启动-x2F-停止" class="headerlink" title="第二步：（选择二，推荐）集群启动&#x2F;停止"></a>第二步：（选择二，推荐）集群启动&#x2F;停止</h4><ol>
+<li><p>在namenode节点启动&#x2F;停止：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ sbin/start-dfs.sh</span><br></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ sbin/stop-dfs.sh</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>在resourcemanager节点启动&#x2F;停止：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ sbin/start-yarn.sh</span><br></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ sbin/stop-yarn.sh</span><br></pre></td></tr></table></figure></li>
+</ol>
+<h2 id="7-测试hdfs-client-api和简单map-reduce-job"><a href="#7-测试hdfs-client-api和简单map-reduce-job" class="headerlink" title="7. 测试hdfs client api和简单map reduce job"></a>7. 测试hdfs client api和简单map reduce job</h2><p>我是自己写了一个hdfs的client api，上传&#x2F;下载文件test.txt</p>
+<p>示例client api代码：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ git <span class="built_in">clone</span> https://github.com/xilu-wang/hdfs-client-java.git</span><br></pre></td></tr></table></figure>
+<p>测试一下mapreduce</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ <span class="built_in">cd</span> /home/admin/hadoop/hadoop-2.7.2</span><br><span class="line">$ hadoop jar share/hadoop/mapreduce/hadoop-mapreduce-examples-2.7.2.jar wordcount hdfs:/test.txt hdfs:/output</span><br></pre></td></tr></table></figure>
+
+<h2 id="8-UI"><a href="#8-UI" class="headerlink" title="8. UI"></a>8. UI</h2><p><strong>Yarn:</strong> <a target="_blank" rel="noopener" href="http://resourcemanager:8088/">http://resourcemanager:8088/</a><br><strong>Hadoop overview:</strong> <a target="_blank" rel="noopener" href="http://secnamenode:50090/status.html">http://secnamenode:50090/status.html</a></p>
+<h1 id="潜在问题和Debug："><a href="#潜在问题和Debug：" class="headerlink" title="潜在问题和Debug："></a>潜在问题和Debug：</h1><ul>
+<li>如果执行完vagrant up之后，vm无法登入，可以重新进入本地的git repo再执行一次 vagrant reload</li>
+<li>如果集群集体启动的时候没有远程启动datanode&#x2F;nodemanager，可以删掉slaves，新建slaves文件，重新格式化namenode</li>
+<li>重新格式化namenode的时候，一定要把name &amp; data文件夹全都删除，位置在&#x2F;home&#x2F;admin&#x2F;hadoop下</li>
+<li>如果mapreduce job起来的时候报错connection confused，可能是好几个vm之间的localhost问题，需要注释掉<code>/etc/hosts/</code>里面的所有有关127.0.0.1和127.0.1.1的映射hostname</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/hadoop/" rel="tag"># hadoop</a>
+              <a href="/tags/hdfs/" rel="tag"># hdfs</a>
+              <a href="/tags/yarn/" rel="tag"># yarn</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/hadoop/hadoop-cluster-config/" rel="prev" title="如何配置小规模的Hadoop集群">
+                  <i class="fa fa-chevron-left"></i> 如何配置小规模的Hadoop集群
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/misc/ssh-server/" rel="next" title="SSH Server的无密登陆">
+                  SSH Server的无密登陆 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Xilu Wang</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" rel="noopener" target="_blank">NexT.Muse</a>
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="Back to top">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>
