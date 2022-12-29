@@ -3,7 +3,7 @@ name: Pages
 on:
   push:
     branches:
-      - hexo  # default branch
+      - main  # default branch
 
 jobs:
   pages:
