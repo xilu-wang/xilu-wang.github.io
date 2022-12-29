@@ -1,5 +1,7 @@
 ---
 title: SSH Server的无密登陆
+date: 2020-07-01 18:40:00
+updated: 2020-07-01 18:40:00
 description: "需要远程登陆ssh server的时候，设置passwordless ssh login是一个必要的步骤。这个文章是我自己在搭建Hadoop cluster的时候配置ssh passwordless的笔记，希望对大家有用。预计用时3分钟"
 categories: 
 - big data

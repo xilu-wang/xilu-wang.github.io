@@ -1,6 +1,7 @@
 ---
 title: 如何配置小规模的Hadoop集群
 date: 2020-06-20 12:25:21
+updated: 2020-06-20 12:25:21
 categories: 
 - hadoop
 tags: 
