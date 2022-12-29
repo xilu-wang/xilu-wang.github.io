@@ -1,6 +1,9 @@
 [submodule "themes/hexo-theme-next"]
 	path = themes/hexo-theme-next
-	url = https://github.com/theme-next/hexo-theme-next.git
+	url = https://github.com/xilu-wang/hexo-theme-next-xilu-site.git
 [submodule "themes/hexo-theme-landscape"]
 	path = themes/hexo-theme-landscape
 	url = https://github.com/hexojs/hexo-theme-landscape.git
+[submodule "themes/hexo-theme-next-xilu-site"]
+	path = themes/hexo-theme-next-xilu-site
+	url = https://github.com/xilu-wang/hexo-theme-next-xilu-site.git
