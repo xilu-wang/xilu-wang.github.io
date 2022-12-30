@@ -1,0 +1,11 @@
+scheme: Mist
+
+menu:
+  home: / || fa fa-home
+  about: /about/ || fa fa-user
+  categories: /categories/ || fa fa-th
+  tags: /tags/ || fa fa-tags
+
+favicon:
+  small: /images/favicon-16x16-xilu.png
+  medium: /images/favicon-32x32-xilu.png
