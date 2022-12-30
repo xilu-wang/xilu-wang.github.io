@@ -1,4 +1,3 @@
-[submodule "themes/next"]
-	path = themes/next
-	url = git@github.com:xilu-wang/next.git
-	branch = xilu-site
+[submodule "themes/hexo-theme-next"]
+	path = themes/hexo-theme-next
+	url = https://github.com/theme-next/hexo-theme-next.git

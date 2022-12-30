@@ -1,1 +1,7 @@
-scheme: Muse
+scheme: Mist
+
+menu:
+  home: / || fa fa-home
+  about: /about/ || fa fa-user
+  categories: /categories/ || fa fa-th
+  tags: /tags/ || fa fa-tags
