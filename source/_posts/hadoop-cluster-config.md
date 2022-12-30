@@ -11,4 +11,5 @@ tags:
 - hdfs
 - yarn
 description: "以三个节点（node）的小规模hadoop集群为示范，简单介绍如何hdfs和yarn。"
+comments: true
 ---
